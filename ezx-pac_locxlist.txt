@@ -1,0 +1,16 @@
+! user define
+!
+.youtube.com
+.ggpht.com
+.googlevideo.com
+.gvt0.com
+.gvt1.com
+.gvt2.com
+.gvt3.com
+.youtu.be
+.ytimg.com
+golang.org
+.google.com
+.googleusercontent.com
+.blogspot.com
+gist.github.com

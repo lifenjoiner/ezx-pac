@@ -26,6 +26,11 @@
 	https://blogs.msdn.microsoft.com/askie/2014/02/07/optimizing-performance-with-automatic-proxyconfiguration-scripts-pac/
 */
 
+/* debug
+IE: https://github.com/lifenjoiner/pacdbger
+firefox: Ctrl+Shift+J, reload; https://github.com/pacparser/pacparser
+*/
+
 exports = {};
 
 if (!Object.create) { // >= IE9
@@ -1408,11 +1413,13 @@ var ProxyListMatcher = new CombinedMatcher();
 
 /* Proxy part */
 
-var direct = "__DIRECT__";
-if (direct == "__DIR" + "ECT__") direct = "DIRECT;";
+var proxies = "PROXY 127.0.0.1:1080; PROXY 127.0.0.1:9666; PROXY 127.0.0.1:8580;";
 
-var wall_proxy = function(){ return "PROXY 127.0.0.1:9666; PROXY 127.0.0.1:1080; DIRECT"; };
-var wall_v6_proxy = function(){ return "PROXY [::1]:9666; PROXY [::1]:1080; DIRECT"; };
+var direct = "__DIRECT__";
+if (direct == "__DIR" + "ECT__") direct = "DIRECT; "+ proxies;
+
+var wall_proxy = function(){ return proxies +" DIRECT"; };
+var wall_v6_proxy = function(){ return "PROXY [::1]:1080; PROXY [::1]:9666; PROXY [::1]:8580; DIRECT"; };
 var ads_blocking = function(){ return "0.0.0.0"; };
 
 var nowall_proxy = function(){ return direct; };
