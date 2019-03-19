@@ -1416,7 +1416,7 @@ var ProxyListMatcher = new CombinedMatcher();
 var proxies = "PROXY 127.0.0.1:1080; PROXY 127.0.0.1:9666; PROXY 127.0.0.1:8580;";
 
 var direct = "__DIRECT__";
-if (direct == "__DIR" + "ECT__") direct = "DIRECT; "+ proxies;
+if (direct == "__DIR" + "ECT__") direct = "DIRECT";
 
 var wall_proxy = function(){ return proxies +" DIRECT"; };
 var wall_v6_proxy = function(){ return "PROXY [::1]:1080; PROXY [::1]:9666; PROXY [::1]:8580; DIRECT"; };
