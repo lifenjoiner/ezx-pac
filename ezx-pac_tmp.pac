@@ -1082,9 +1082,7 @@ Matcher.prototype = {
     if (text.substr(0, 2) == "@@")
       text = text.substr(2);
 
-    var candidates = text.toLowerCase().match(
-      /[^a-z0-9%*][a-z0-9%]{3,}(?=[^a-z0-9%*])/g
-    );
+    var candidates = text.toLowerCase().match(/[^\w\-%*][\w\-%]+(?=[^\w\-%*])/g);
     if (!candidates)
       return result;
 
@@ -1176,7 +1174,7 @@ Matcher.prototype = {
    */
   matchesAny: function(location, typeMask, docDomain, thirdParty, sitekey, specificOnly)
   {
-    var candidates = location.toLowerCase().match(/[a-z0-9%]{3,}/g);
+    var candidates = location.toLowerCase().match(/[\w\-%]+/g);
     if (candidates === null)
       candidates = [];
     //candidates.push("");
@@ -1350,7 +1348,7 @@ CombinedMatcher.prototype =
   matchesAnyInternal: function(location, typeMask, docDomain, thirdParty, sitekey,
                      specificOnly)
   {
-    var candidates = location.toLowerCase().match(/[a-z0-9%]{3,}/g);
+    var candidates = location.toLowerCase().match(/[\w\-%]+/g);
     if (candidates === null)
       candidates = [];
     //candidates.push("");
