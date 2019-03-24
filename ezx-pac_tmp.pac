@@ -18,7 +18,8 @@
 		* change 'ElemHide' to 'InvalidFilter'
 		* Matcher.add only select "whitelist" and "blocking"
 		* use 'substr' for String instead of '[]'
-		* remove 'candidates.push("")' in 'CombinedMatcher.prototype: matchesAnyInternal' and 'Matcher.prototype: matchesAny' process, it could cause high cpu resume. example url: 'http://www.b.com/b5fa786048c47b454f127bdb1eb30c0d616c6b640d3ef4a206dc071f9820cb388c142043.mp3'
+		* change keywords pattern to '[a-z0-9%]+', seems a little better performance
+		? it could cause high cpu resume. example url: 'http://www.b.com/b5fa786048c47b454f127bdb1eb30c0d616c6b640d3ef4a206dc071f9820cb388c142043.mp3'
 	'FindProxyForURL' part from SSR.
 	https://github.com/breakwa11/gfw_whitelist/tree/master/ssr
         * ensure item is valid, in case of "new RegExp('','').test()"
@@ -1082,7 +1083,7 @@ Matcher.prototype = {
     if (text.substr(0, 2) == "@@")
       text = text.substr(2);
 
-    var candidates = text.toLowerCase().match(/[^\w\-%*][\w\-%]+(?=[^\w\-%*])/g);
+    var candidates = text.toLowerCase().match(/[^a-z0-9%*][a-z0-9%]+(?=[^a-z0-9%*])/g);
     if (!candidates)
       return result;
 
@@ -1174,10 +1175,10 @@ Matcher.prototype = {
    */
   matchesAny: function(location, typeMask, docDomain, thirdParty, sitekey, specificOnly)
   {
-    var candidates = location.toLowerCase().match(/[\w\-%]+/g);
+    var candidates = location.toLowerCase().match(/[a-z0-9%]+/g);
     if (candidates === null)
       candidates = [];
-    //candidates.push("");
+    candidates.push(""); // no keyword parts as ""
     for (var i = 0, l = candidates.length; i < l; i++)
     {
       var substr = candidates[i];
@@ -1348,10 +1349,10 @@ CombinedMatcher.prototype =
   matchesAnyInternal: function(location, typeMask, docDomain, thirdParty, sitekey,
                      specificOnly)
   {
-    var candidates = location.toLowerCase().match(/[\w\-%]+/g);
+    var candidates = location.toLowerCase().match(/[a-z0-9%]+/g);
     if (candidates === null)
       candidates = [];
-    //candidates.push("");
+    candidates.push(""); // no keyword parts as ""
 
     var blacklistHit = null;
     for (var i = 0, l = candidates.length; i < l; i++)
