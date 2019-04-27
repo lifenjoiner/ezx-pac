@@ -1414,13 +1414,14 @@ var ProxyListMatcher = new CombinedMatcher();
 
 /* Proxy part */
 
-var proxies = "PROXY 127.0.0.1:1080; PROXY 127.0.0.1:9666; PROXY 127.0.0.1:8580;";
+var proxies = "PROXY 127.0.0.1:1080; PROXY 127.0.0.1:2080; PROXY 127.0.0.1:9666; PROXY 127.0.0.1:8580; PROXY 127.0.0.1:19180;";
 
 var direct = "__DIRECT__";
-if (direct == "__DIR" + "ECT__") direct = "DIRECT";
+if (direct == "__DIR" + "ECT__") direct = "PROXY 127.0.0.1:7777; DIRECT;";
+//if (direct == "__DIR" + "ECT__") direct = "DIRECT; PROXY 127.0.0.1:7777;";
 
 var wall_proxy = function(){ return proxies +" DIRECT"; };
-var wall_v6_proxy = function(){ return "PROXY [::1]:1080; PROXY [::1]:9666; PROXY [::1]:8580; DIRECT"; };
+var wall_v6_proxy = function(){ return "PROXY [::1]:1080; PROXY [::1]:2080; PROXY [::1]:9666; PROXY [::1]:8580; PROXY [::1]:19180; DIRECT"; };
 var ads_blocking = function(){ return "0.0.0.0"; };
 
 var nowall_proxy = function(){ return direct; };
@@ -1430,11 +1431,14 @@ var ipv6_proxy = function(){ return nowall_proxy(); };
 /* Executing */
 
 var subnetIpRangeList = [
-0,1,
+0,1,					//0.0.0.0
 167772160,184549376,    //10.0.0.0/8
 2886729728,2887778304,	//172.16.0.0/12
 3232235520,3232301056,	//192.168.0.0/16
-2130706432,2130706688	//127.0.0.0/24
+2130706432,2130706688,	//127.0.0.0/24
+2851995648,2852061184,	//169.254.0.0/16
+3758096384,4026531840,	//224.0.0.0/4
+4294967295,4294967296	//255.255.255.255
 ];
 
 function convertAddress(ipchars) {
@@ -1465,7 +1469,8 @@ function check_ipv6_dns(dnsstr) {
     }
 }
 function isInSubnetRange(ipRange, intIp) {
-    for ( var i = 0; i < 10; i += 2 ) {
+    var n = ipRange.length;
+    for ( var i = 0; i < n; i += 2 ) {
         if ( ipRange[i] <= intIp && intIp < ipRange[i+1] )
             return true;
     }
@@ -1473,14 +1478,14 @@ function isInSubnetRange(ipRange, intIp) {
 function getProxyFromIP(strIp) {
     var intIp = convertAddress(strIp);
     if ( isInSubnetRange(subnetIpRangeList, intIp) ) {
-        return direct;
+        return "DIRECT";
     }
     return ip_proxy();
 }
 
 function FindProxyForURL(url, host) {
     if ( isPlainHostName(host) === true ) {
-        return direct;
+        return "DIRECT";
     }
     if ( (BlackListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter)
     || (AdsListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter) ) { // only exclude 64
