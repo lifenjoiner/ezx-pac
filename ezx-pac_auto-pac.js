@@ -45,7 +45,7 @@ $cmd$ = function(s){ //not interactive
 }
 /*******/
 function get_html_text(url, dom_opr){
-    var wget_plus = "cmd /c wget --timeout=60 --user-agent=Mozilla/5.0 -c -O -";
+    var wget_plus = "cmd /c wget --timeout=30 --user-agent=Mozilla/5.0 -c -O -";
     
     var ret = $cmd$(wget_plus +" -t 3 " +url +(!dom_opr?"":(" |"+ dom_opr)));
     return ret;
@@ -94,7 +94,7 @@ var Base64 = {
 	_utf8_decode : function (utftext) {
 		var string = "";
 		var i = 0;
-		var c = c1 = c2 = 0;
+		var c = 0, c1 = 0, c2 = 0;
 
 		while ( i < utftext.length ) {
 
@@ -235,6 +235,9 @@ function access_host_items(items){
             }
         }
     }
+    // MUST be removed for releasing
+    Filter.knownFilters = Object.create(null);
+    //
     if (items_w.length) {
         items_r = ( items_r.join('\n') +'\n'+ items_w.join('\n') ).split('\n');
     }
@@ -282,6 +285,9 @@ function matcher_add_filters(MatcherX, items) {
 			MatcherX.add(Filter.fromText(items[i]));
 		}
 	}
+    // MUST be removed for releasing
+    Filter.knownFilters = Object.create(null);
+    //
 	return MatcherX;
 }
 
@@ -297,8 +303,8 @@ function geturlhost(url) {
 //
 function clean_direct_hosts(items_p, items_b) {
 	if (!items_p || !items_p.length) return items_b;
+	var ProxyListMatcher = new CombinedMatcher(); // use local var to reduce memory
 	ProxyListMatcher = matcher_add_filters(ProxyListMatcher, items_p);
-	var L = items_b.length;
 	var items_r = [];
 	var items_rh = [];
 	for (var i in items_b) {
@@ -315,6 +321,10 @@ function clean_direct_hosts(items_p, items_b) {
 	if (items_rh.length > 0) {
 		items_r = ( items_r.join("\n") +"\n"+ items_rh.join("\n") ).split("\n");
 	}
+	//
+	items_rh = null;
+	ProxyListMatcher.clear();
+	//
 	return items_r;
 }
 
@@ -336,7 +346,7 @@ function update_result(){
     var data_ms = data.replace("__RULES_EASYLIST_IN_GFW__", items2arraystr(easylist));
     //
     $dsg(data);
-    file = $newstream(file_out_ms);
+    var file = $newstream(file_out_ms);
     file.Write(data_ms);
     file.Close();
     //
@@ -359,7 +369,7 @@ var filename_out_ff = WScript.ScriptName.replace("_auto-pac.js", "_ff.pac");
 //
 /* include and eval public part of ezx-pac_tmp.pac */
 var data = $readall(file_in, 1);
-eval( data.slice(0, data.indexOf("/* Proxy part */")) );
+eval( data.slice(0, data.indexOf("/* New instance */")) );
 //
 $run("httpd.exe", "0");
 $msg("IE/EDGE url: http://127.0.0.1/"+ filename_out_ms);
@@ -369,6 +379,25 @@ if ($run("ping -n 1 114.114.114.114", "0", true) != 0) { // hibernation
     WScript.Sleep(60000);
 }
 update_result();
+
+data = null;
+
+function deep_clean(Obj) {
+    var e;
+    for (var k in Obj) {
+        try {deep_clean(Obj[k])} catch(e){}
+        try {delete Obj[k]} catch(e){}
+        try {Obj[k] = null} catch(e){}
+    }
+    try {delete Obj} catch(e){}
+    try {Obj = null} catch(e){}
+}
+
+var helper_funs = ['extend', 'filterToRegExp', 'Filter', 'InvalidFilter', 'CommentFilter', 'ActiveFilter', 'RegExpFilter', 'BlockingFilter', 'WhitelistFilter', 'Matcher', 'CombinedMatcher'];
+for (var i = 0; i < helper_funs.length; i++) {
+    deep_clean(this[ helper_funs[i] ]);
+}
+
 var sleep_h = 7;
 $msg(new Date());
 $cmd("cmd /c RefreshConnection");

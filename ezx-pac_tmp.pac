@@ -34,7 +34,6 @@ IE: https://github.com/lifenjoiner/pacdbger
 firefox: Ctrl+Shift+J, reload; https://github.com/pacparser/pacparser
 */
 
-exports = {};
 
 if (!Object.create) { // >= IE9
     Object.create = function(proto, properties) {
@@ -79,7 +78,6 @@ function extend(superclass, properties)
     }
     return new retclass();
 }
-exports.extend = extend;
 
 if (!String.prototype.includes) {
     String.prototype.includes = function(search, start) {
@@ -140,7 +138,6 @@ function Filter(text)
   this.text = text;
   this.subscriptions = [];
 }
-exports.Filter = Filter;
 
 Filter.prototype =
 {
@@ -300,7 +297,6 @@ function InvalidFilter(text, reason)
 
   this.reason = reason;
 }
-exports.InvalidFilter = InvalidFilter;
 
 InvalidFilter.prototype = extend(Filter, {
   type: "invalid",
@@ -328,7 +324,6 @@ function CommentFilter(text)
 {
   Filter.call(this, text);
 }
-exports.CommentFilter = CommentFilter;
 
 CommentFilter.prototype = extend(Filter, {
   type: "comment",
@@ -356,7 +351,6 @@ function ActiveFilter(text, domains)
 
   this.domainSource = domains;
 }
-exports.ActiveFilter = ActiveFilter;
 
 ActiveFilter.prototype = extend(Filter, {
   _disabled: false,
@@ -678,7 +672,6 @@ function RegExpFilter(text, regexpSource, contentType, matchCase, domains,
     this.regexpSource = regexpSource;
   }
 }
-exports.RegExpFilter = RegExpFilter;
 
 RegExpFilter.prototype = extend(ActiveFilter, {
   /**
@@ -828,7 +821,7 @@ RegExpFilter.fromText = function(text)
     text = match.input.substr(0, match.index);
     for (var i in options)
     {
-      option = options[i];
+      var option = options[i];
       var value = null;
       var separatorIndex = option.indexOf("=");
       if (separatorIndex >= 0)
@@ -945,7 +938,6 @@ function BlockingFilter(text, regexpSource, contentType, matchCase, domains,
 
   this.collapse = collapse;
 }
-exports.BlockingFilter = BlockingFilter;
 
 BlockingFilter.prototype = extend(RegExpFilter, {
   type: "blocking",
@@ -976,7 +968,6 @@ function WhitelistFilter(text, regexpSource, contentType, matchCase, domains,
   RegExpFilter.call(this, text, regexpSource, contentType, matchCase, domains,
                     thirdParty, sitekeys);
 }
-exports.WhitelistFilter = WhitelistFilter;
 
 WhitelistFilter.prototype = extend(RegExpFilter, {
   type: "whitelist"
