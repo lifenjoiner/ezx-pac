@@ -4,16 +4,17 @@ ez (Easylist) + x (gfwlist) pac (Proxy Auto-Config) file template and auto gener
 homepage: https://github.com/lifenjoiner/ezx-pac
 
 ## Files
-| file                  | comments                                            |
-| --------------------- | --------------------------------------------------- |
-| ezx-pac_auto-pac.js   | <- auto generating script, run this                 |
-| ezx-pac_blacklist.txt | local list setting block rules                      |
-| ezx-pac_locxlist.txt  | local list setting extra gfwlist                    |
-| ezx-pac_tmp.pac       | <- the template                                     |
-| LICENSE               |                                                     |
-| README.md             |                                                     |
-| RefreshConnection.bat | make the update take effect                         |
-| wget.bat or wget.exe  | help to get the wget in other location by full path |
+| file                    | comments                                            |
+| ----------------------- | --------------------------------------------------- |
+| ezx-pac_auto-pac.js     | <- auto generating script, run this                 |
+| ezx-pac_blacklist.txt   | local list setting block rules                      |
+| ezx-pac_gfwlist_del.txt | items to be deleted from gfwlist                    |
+| ezx-pac_locxlist.txt    | local list setting extra gfwlist                    |
+| ezx-pac_tmp.pac         | <- the template                                     |
+| LICENSE                 |                                                     |
+| README.md               |                                                     |
+| RefreshConnection.bat   | make the update take effect                         |
+| wget.bat or wget.exe    | help to get the wget in other location by full path |
 
 ## Debug
 IE: https://github.com/lifenjoiner/pacdbger
