@@ -1405,14 +1405,14 @@ var ProxyListMatcher = new CombinedMatcher();
 
 /* Proxy part */
 
-var proxies = "PROXY 127.0.0.1:1080; PROXY 127.0.0.1:2080; PROXY 127.0.0.1:9666; PROXY 127.0.0.1:8580; PROXY 127.0.0.1:19180;";
+var proxies = "PROXY 127.0.0.1:6699; DIRECT";
+var proxies_v6 = "PROXY [::1]:6699; DIRECT";
 
 var direct = "__DIRECT__";
-if (direct == "__DIR" + "ECT__") direct = "PROXY 127.0.0.1:7777; DIRECT;";
-//if (direct == "__DIR" + "ECT__") direct = "DIRECT; PROXY 127.0.0.1:7777;";
+if (direct == "__DIR" + "ECT__") direct = "DIRECT; PROXY 127.0.0.1:6699";
 
-var wall_proxy = function(){ return proxies +" DIRECT"; };
-var wall_v6_proxy = function(){ return "PROXY [::1]:1080; PROXY [::1]:2080; PROXY [::1]:9666; PROXY [::1]:8580; PROXY [::1]:19180; DIRECT"; };
+var wall_proxy = function(){ return proxies; };
+var wall_v6_proxy = function(){ return proxies_v6; };
 var ads_blocking = function(){ return "0.0.0.0"; };
 
 var nowall_proxy = function(){ return direct; };
