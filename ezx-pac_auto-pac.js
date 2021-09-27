@@ -420,18 +420,18 @@ function update_result(){
         return;
     }
     easylist = clean_direct_hosts(gfw_list, easylist);
-    var data_ms = data.replace("__RULES_EASYLIST_IN_GFW__", items2arraystr(easylist));
+    var data_ezx = data.replace("__RULES_EASYLIST_IN_GFW__", items2arraystr(easylist));
     //
     $dsg(data);
-    var file = $newstream(file_out_ms);
-    file.Write(data_ms);
+    var file = $newstream(file_out_ezx);
+    file.Write(data_ezx);
     file.Close();
     //
-    var data_ff = data.replace("__RULES_EASYLIST_IN_GFW__", "[]");
+    var data_gfw = data.replace("__RULES_EASYLIST_IN_GFW__", "[]");
     //
     $dsg(data);
-    file = $newstream(file_out_ff);
-    file.Write(data_ff);
+    file = $newstream(file_out_gfw);
+    file.Write(data_gfw);
     file.Close();
     return 1;
 }
@@ -439,18 +439,18 @@ function update_result(){
 /* *** */
 $msg(new Date() +" [Start]");
 var file_in = WScript.ScriptFullName.replace("_auto-pac.js", "_tmp.pac");
-var file_out_ms = WScript.ScriptFullName.replace("_auto-pac.js", "_ms.pac");
-var file_out_ff = WScript.ScriptFullName.replace("_auto-pac.js", "_ff.pac");
-var filename_out_ms = WScript.ScriptName.replace("_auto-pac.js", "_ms.pac");
-var filename_out_ff = WScript.ScriptName.replace("_auto-pac.js", "_ff.pac");
+var file_out_ezx = WScript.ScriptFullName.replace("_auto-pac.js", "_ezx.pac");
+var file_out_gfw = WScript.ScriptFullName.replace("_auto-pac.js", "_gfw.pac");
+var filename_out_ezx = WScript.ScriptName.replace("_auto-pac.js", "_ezx.pac");
+var filename_out_gfw = WScript.ScriptName.replace("_auto-pac.js", "_gfw.pac");
 //
 /* include and eval public part of ezx-pac_tmp.pac */
 var data = $readall(file_in);
 eval( data.slice(0, data.indexOf("/* New instance */")) );
 //
 $run("httpd.exe", "0");
-$msg("IE/EDGE url: http://127.0.0.1/"+ filename_out_ms);
-$msg("firefox url: http://127.0.0.1/"+ filename_out_ff);
+$msg("gfw-only    : http://127.0.0.1/"+ filename_out_gfw);
+$msg("gfw+easylist: http://127.0.0.1/"+ filename_out_ezx);
 if ($run("ping -n 1 1.2.4.8", "0", true) != 0) { // hibernation
     $msg("Waiting 1 minute for connecting to network ...");
     WScript.Sleep(60000);
