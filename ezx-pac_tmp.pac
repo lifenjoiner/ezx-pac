@@ -1399,9 +1399,8 @@ CombinedMatcher.prototype =
 
 /* New instance */
 
-var AdsListMatcher = new CombinedMatcher();
-var BlackListMatcher = new CombinedMatcher();
-var ProxyListMatcher = new CombinedMatcher();
+var BlockListMatcher = new CombinedMatcher();
+var TestListMatcher = new CombinedMatcher();
 
 /* Proxy part */
 
@@ -1478,37 +1477,31 @@ function FindProxyForURL(url, host) {
     if ( isPlainHostName(host) === true ) {
         return "DIRECT";
     }
-    if ( (BlackListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter)
-    || (AdsListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter) ) { // only exclude 64
+    if ( (BlockListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter) ) { // only exclude 64
         return ads_blocking();
     }
-    if (ProxyListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter) { // only exclude 64
-        return wall_proxy();
+    if (TestListMatcher.matchesAny(url, 1, host) instanceof BlockingFilter) { // only exclude 64
+        return TestLisIsProxyList ? wall_proxy() : direct;
     }
     if ( check_ipv4(host) === true ) {
         return getProxyFromIP(host);
     }
-    return direct;
+    return TestLisIsProxyList ? direct : wall_proxy();
 }
 
 /* data definition */
-var rules_blacklist = __RULES_BLACKLIST__;
-var rules_easylist_in_gfw = __RULES_EASYLIST_IN_GFW__;
-var rules_gfw = __RULES__;
+var TestLisIsProxyList = __TestLisIsProxyList__;
+var rules_blocklist = __BLOCKLIST_RULES__;
+var rules_testlist = __TEST_RULES__;
 
 /* Initializing Filter */
-for (var i = 0; i < rules_blacklist.length; i++) {
-    if (rules_blacklist[i]) {
-        BlackListMatcher.add(Filter.fromText(rules_blacklist[i]));
+for (var i = 0; i < rules_blocklist.length; i++) {
+    if (rules_blocklist[i]) {
+        BlockListMatcher.add(Filter.fromText(rules_blocklist[i]));
     }
 }
-for (var i = 0; i < rules_easylist_in_gfw.length; i++) {
-    if (rules_easylist_in_gfw[i]) {
-        AdsListMatcher.add(Filter.fromText(rules_easylist_in_gfw[i]));
-    }
-}
-for (var i = 0; i < rules_gfw.length; i++) {
-    if (rules_gfw[i]) { // in case of ''
-        ProxyListMatcher.add(Filter.fromText(rules_gfw[i]));
+for (var i = 0; i < rules_testlist.length; i++) {
+    if (rules_testlist[i]) { // in case of ''
+        TestListMatcher.add(Filter.fromText(rules_testlist[i]));
     }
 }

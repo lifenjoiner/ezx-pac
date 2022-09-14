@@ -1,0 +1,29 @@
+! 电信注射广告
+.114dgw.com
+.imneinei.com
+.xibeijiancai.cn
+.xingshenfang.cn
+.youle55.com
+101.95.144.52
+113.10.168.247
+118.178.108.0
+120.27.28.39
+139.129.220.86
+222.186.52.29
+222.73.4.49
+/58.215.179.159
+/60.190.139.164
+/61.152.223.15
+/61.152.73.138
+/61.174.50.203
+www.firelucky.com
+www.richest007.net
+limeishang.com
+
+! pathes
+/hunter/alog/*
+.baidu.com/*/logger.*
+/nslog/nslog.*
+/nsclick.baidu.com
+.bilibili.com/x/web-show/
+.spriteapp.cn/*/download.mp3

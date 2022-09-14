@@ -222,27 +222,49 @@ function items2arraystr(items) {
 }
 
 /*******/
-function get_gfw_result_str() {
-    var text, tmp, result;
-    var url;
+function get_text_from_urls(urls)
+{
+    var url, L;
+    var tmp, text = "";
     //
-    url = "https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt"; // 6h
-    $msg(url);
-    text = get_html_text(url, "");
+    L = urls.length;
+    for (var i = 0; i < L; i++) {
+        url = urls[i];
+        if (!url) continue;
+        $msg(url);
+        tmp = get_html_text(url, "");
+        if (!tmp) {
+            $msg("<err?");
+            return "";
+        }
+        $msg("<got!");
+        //
+        text += "\n"+ tmp;
+    }
+    return text;
+}
+
+/*******/
+function get_gfw_result_str() {
+    var text;
+    var urls = [
+        "https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt", /* 6h */
+    ];
+    //
+    text = get_text_from_urls(urls);
     text = $base64.decode(text);
-    $msg(text?"<got!":"<err?");
+    $msg(text ? "<got!" : "<err?");
     //
     return text;
 }
 
 function get_locx_result_str() {
-    var text, tmp, result;
-    var url;
+    var text;
+    var urls = [
+        "http://127.0.0.1/ezx-pac_locxlist.txt", /* user define */
+    ];
     //
-    url = "http://127.0.0.1/ezx-pac_locxlist.txt"; // user define
-    $msg(url);
-    text = get_html_text(url, "");
-    $msg(!text?"<err?":"<got!");
+    text = get_text_from_urls(urls);
     //
     return text;
 }
@@ -268,17 +290,26 @@ function get_gfw_result_items() {
 }
 
 /*******/
-function get_blacklist_result_items() {
-    var text, tmp, result;
-    var url;
+function get_domains_from_dnsmasq_cfg(text){
+    text = removeemptyline(text);
+    text = text.replace(new RegExp('server=/([^/]+)/.*', "mg"), "$1");
+    return text;
+}
+
+function get_dnsmasq_cn_result(){
+    var text;
+    var urls = [
+        "https://github.com/felixonmars/dnsmasq-china-list/raw/master/accelerated-domains.china.conf",
+        "https://github.com/felixonmars/dnsmasq-china-list/raw/master/google.china.conf",
+        "https://github.com/felixonmars/dnsmasq-china-list/raw/master/apple.china.conf"
+    ];
     //
-    url = "http://127.0.0.1/ezx-pac_blacklist.txt"; // service provider injection
-    $msg(url);
-    text = get_html_text(url, "");
-    $msg(!text?"<err?":"<got!");
+    text = get_text_from_urls(urls);
     //
-    text = cleangfwliststr(text);
-    return textline2array(text);
+    text = get_domains_from_dnsmasq_cfg(text);
+    text = textline2array(text);
+    //
+    return text;
 }
 
 /*******/
@@ -320,29 +351,14 @@ use ff ad block addon.
 function get_easylist_result(){
     var text, tmp, result;
     var urls = [
-    "https://easylist-downloads.adblockplus.org/easylistchina.txt",
-    "https://github.com/easylist/easylist/raw/master/easylist/easylist_general_block.txt",
-    "https://github.com/easylist/easylist/raw/master/easylist/easylist_general_block_dimensions.txt",
-    "https://github.com/easylist/easylist/raw/master/easylist/easylist_adservers.txt",
-    "https://github.com/easylist/easylist/raw/master/easylist/easylist_thirdparty.txt"
-    ]; // 4d
-    var url, L;
-    //
-    L = urls.length;
-    text = "";
-    for (var i = 0; i < L; i++) {
-        url = urls[i];
-        if (!url) continue;
-        $msg(url);
-        tmp = get_html_text(url, "");
-        if (!tmp) {
-            $msg("<err?");
-            return [];
-        }
-        $msg("<got!");
-        //
-        text += "\n"+ tmp;
-    }
+        "http://127.0.0.1/ezx-pac_blocklist.txt", /* service provider injection */
+        "https://easylist-downloads.adblockplus.org/easylistchina.txt",
+        "https://github.com/easylist/easylist/raw/master/easylist/easylist_general_block.txt",
+        "https://github.com/easylist/easylist/raw/master/easylist/easylist_general_block_dimensions.txt",
+        "https://github.com/easylist/easylist/raw/master/easylist/easylist_adservers.txt",
+        "https://github.com/easylist/easylist/raw/master/easylist/easylist_thirdparty.txt"
+    ];
+    text = get_text_from_urls(urls);
     //
     text = removeemptyline(text);
     text = textline2array(text);
@@ -373,65 +389,31 @@ function geturlhost(url) {
     return ret;
 }
 
-//
-function clean_direct_hosts(items_p, items_b) {
-    if (!items_p || !items_p.length) return items_b;
-    var ProxyListMatcher = new CombinedMatcher(); // use local var to reduce memory
-    ProxyListMatcher = matcher_add_filters(ProxyListMatcher, items_p);
-    var items_r = [];
-    var items_rh = [];
-    for (var i in items_b) {
-        var host = geturlhost(items_b[i]);
-        if (!host) {
-            $dsg("[url]  " + items_b[i]);
-            items_r.push( items_b[i] );
-        }
-        else if (ProxyListMatcher.matchesAny(host, 1, host) instanceof BlockingFilter) {
-            $dsg("[host] " + items_b[i]);
-            items_rh.push( items_b[i] );
-        }
-    }
-    if (items_rh.length > 0) {
-        items_r = ( items_r.join("\n") +"\n"+ items_rh.join("\n") ).split("\n");
-    }
-    //
-    items_rh = null;
-    ProxyListMatcher.clear();
-    //
-    return items_r;
-}
-
 function update_result(){
-    var gfw_list = get_gfw_result_items();
-    if (gfw_list.length == 0) {
-        $msg("Update gfwlist failed, abort updates!");
+    pac_script = pac_script.replace("__TestLisIsProxyList__", TestLisIsProxyList);
+    //
+    var block_list = get_easylist_result();
+    if (block_list.length == 0) {
+        $msg("No block list rules!");
+    }
+    //
+    var test_list = TestLisIsProxyList ? get_gfw_result_items() : get_dnsmasq_cn_result();
+    if (test_list.length == 0) {
+        $msg("No test list rules!");
         return;
     }
     //
-    var result_str = items2arraystr(gfw_list);
-    data = data.replace("__RULES__", result_str);
+    pac_script = pac_script.replace("__TEST_RULES__", items2arraystr(test_list));
     //
-    var blacklist = get_blacklist_result_items();
-    data = data.replace("__RULES_BLACKLIST__", items2arraystr(blacklist));
     //
-    var easylist = get_easylist_result();
-    if (easylist.length == 0) {
-        $msg("Update gfwlist failed, abort updates!");
-        return;
-    }
-    easylist = clean_direct_hosts(gfw_list, easylist);
-    var data_ezx = data.replace("__RULES_EASYLIST_IN_GFW__", items2arraystr(easylist));
-    //
-    $dsg(data);
-    var file = $newstream(file_out_ezx);
-    file.Write(data_ezx);
+    pac_script_x = pac_script.replace("__BLOCKLIST_RULES__", '[]');
+    file = $newstream(file_out_x);
+    file.Write(pac_script_x);
     file.Close();
     //
-    var data_gfw = data.replace("__RULES_EASYLIST_IN_GFW__", "[]");
-    //
-    $dsg(data);
-    file = $newstream(file_out_gfw);
-    file.Write(data_gfw);
+    var pac_script_ezx = pac_script.replace("__BLOCKLIST_RULES__", items2arraystr(block_list));
+    var file = $newstream(file_out_ezx);
+    file.Write(pac_script_ezx);
     file.Close();
     return 1;
 }
@@ -440,24 +422,28 @@ function update_result(){
 $msg(new Date() +" [Start]");
 var file_in = WScript.ScriptFullName.replace("_auto-pac.js", "_tmp.pac");
 var file_out_ezx = WScript.ScriptFullName.replace("_auto-pac.js", "_ezx.pac");
-var file_out_gfw = WScript.ScriptFullName.replace("_auto-pac.js", "_gfw.pac");
+var file_out_x = WScript.ScriptFullName.replace("_auto-pac.js", "_x.pac");
 var filename_out_ezx = WScript.ScriptName.replace("_auto-pac.js", "_ezx.pac");
-var filename_out_gfw = WScript.ScriptName.replace("_auto-pac.js", "_gfw.pac");
+var filename_out_x = WScript.ScriptName.replace("_auto-pac.js", "_x.pac");
 //
 /* include and eval public part of ezx-pac_tmp.pac */
-var data = $readall(file_in);
-eval( data.slice(0, data.indexOf("/* New instance */")) );
+var pac_script = $readall(file_in);
+eval( pac_script.slice(0, pac_script.indexOf("/* New instance */")) );
+//
+var TestLisIsProxyList = false;
 //
 $run("httpd.exe", "0");
-$msg("gfw-only    : http://127.0.0.1/"+ filename_out_gfw);
-$msg("gfw+easylist: http://127.0.0.1/"+ filename_out_ezx);
-if ($run("ping -n 1 1.2.4.8", "0", true) != 0) { // hibernation
+$msg("TestLisIs : "+ (TestLisIsProxyList ? "ProxyList" : "DirectList"));
+$msg("x-only    : http://127.0.0.1/"+ filename_out_x);
+$msg("x+easylist: http://127.0.0.1/"+ filename_out_ezx);
+if ($run("ping -n 1 114.114.114.114", "0", true) != 0) { // hibernation
     $msg("Waiting 1 minute for connecting to network ...");
     WScript.Sleep(60000);
 }
+
 update_result();
 
-data = null;
+pac_script = null;
 
 function deep_clean(Obj) {
     var e;
